@@ -11,6 +11,11 @@ venv/
 ENV/
 env/
 
+# Build & Dist
+build/
+dist/
+*.spec
+
 # macOS
 .DS_Store
 .AppleDouble

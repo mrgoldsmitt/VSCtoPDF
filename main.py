@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 main.py - Hauptprogramm für VSCtoPDF.
-Startet standardmäßig die macOS GUI. Kann bei Bedarf auch als CLI-Tool verwendet werden.
+Startet standardmäßig die native macOS Benutzeroberfläche (PySide6 mit SVG-Icons).
+Kann bei Bedarf auch als CLI-Tool verwendet werden.
 """
 
 import sys
 import os
 import argparse
 
-# Sicherstellen, dass das aktuelle Skriptverzeichnis im Python-Pfad liegt
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -19,7 +19,7 @@ from printer import get_installed_printers, print_pdf
 
 def run_cli(args):
     """Kommandozeilen-Modus für Skripte und Batch-Verarbeitung."""
-    print(f"=== VSCtoPDF CLI-Modus ===")
+    print("=== VSCtoPDF CLI-Modus ===")
     from gui import scan_directory, is_text_or_code_file
 
     targets = []
@@ -72,7 +72,6 @@ def run_cli(args):
 
 def main():
     if len(sys.argv) > 1 and not (len(sys.argv) == 2 and sys.argv[1].startswith("-psn")):
-        # CLI Argumente parsen
         parser = argparse.ArgumentParser(
             description="Konvertiert Code-Dateien in DIN-A4 PDF und druckt sie optional auf macOS."
         )
@@ -88,27 +87,27 @@ def main():
         args = parser.parse_args()
 
         if args.gui or not args.inputs:
-            from gui import main as start_gui, HAS_DND
-            import tkinter as tk
-            if HAS_DND:
-                from tkinterdnd2 import TkinterDnD
-                root = TkinterDnD.Tk()
-            else:
-                root = tk.Tk()
-            from gui import VSCtoPDFApp
-            app = VSCtoPDFApp(root)
+            from PySide6.QtWidgets import QApplication
+            from gui import VSCtoPDFMainWindow
+            app = QApplication(sys.argv)
+            app.setApplicationName("VSCtoPDF")
+            window = VSCtoPDFMainWindow()
             if args.inputs:
-                app.add_paths(args.inputs)
+                window.add_paths(args.inputs)
             if args.word:
-                app.footer_entry.delete(0, tk.END)
-                app.footer_entry.insert(0, args.word)
-            root.mainloop()
+                window.txt_footer.setText(args.word)
+            window.show()
+            sys.exit(app.exec())
         else:
             run_cli(args)
     else:
-        # Standard: GUI starten
-        from gui import main as start_gui
-        start_gui()
+        from PySide6.QtWidgets import QApplication
+        from gui import VSCtoPDFMainWindow
+        app = QApplication(sys.argv)
+        app.setApplicationName("VSCtoPDF")
+        window = VSCtoPDFMainWindow()
+        window.show()
+        sys.exit(app.exec())
 
 
 if __name__ == "__main__":

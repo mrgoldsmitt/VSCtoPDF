@@ -1,11 +1,15 @@
 # VSCtoPDF – Code zu DIN-A4 PDF Konverter & Direktdruck für macOS
 
-**VSCtoPDF** ist eine maßgeschneiderte macOS-Anwendung, mit der Sie einzelne Quellcodedateien (`.html`, `.css`, `.py`, `.js`, `.ts`, `.json`, etc.) oder ganze Projektordner per Drag & Drop oder Dateidialog einfügen, automatisch als formatierte DIN-A4 PDF-Dokumente exportieren und anschließend selektiv über die installierten Mac-Drucker ausdrucken können.
+**VSCtoPDF** ist eine native macOS-Anwendung (mit modernem PySide6-Interface und gestochen scharfen SVG-Vektoricons), mit der Sie einzelne Quellcodedateien (`.html`, `.css`, `.py`, `.js`, `.ts`, `.json`, etc.) oder ganze Projektordner per Drag & Drop oder Dateidialog einfügen, automatisch als formatierte DIN-A4 PDF-Dokumente exportieren und anschließend selektiv über die installierten Mac-Drucker ausdrucken können.
 
 ---
 
 ## 🌟 Highlights & Funktionen
 
+- **Native macOS App & Installation:**
+  Kann als echte macOS-App direkt nach `/Applications` (Programme) installiert werden. Startet aus Spotlight, Launchpad und dem Finder ohne Terminal.
+- **Reine SVG-Vektoricons:**
+  Alle Icons der Benutzeroberfläche sind moderne, skalierbare SVG-Dateien (`assets/icons/`), die auch auf Retina-Displays gestochen scharf dargestellt werden.
 - **DIN-A4 Format mit Zeilennummern & Syntax-Highlighting:**
   Jede Datei wird exakt auf DIN-A4 Seitenbreite formatiert. Lange Codezeilen brechen automatisch und sauber um. Zeilennummern und Syntax-Hervorhebung sorgen für perfekte Lesbarkeit auf Papier.
 - **Kopfzeile (Header):**
@@ -17,7 +21,7 @@
   Die erzeugten PDF-Dateien werden automatisch **im selben Ordner** wie die jeweilige Originaldatei gespeichert (`dateiname.ext.pdf`).
 - **Direktdruck auf dem Mac:**
   - Automatische Erkennung aller auf dem Mac installierten Drucker (CUPS) inklusive Standarddrucker.
-  - Interaktive Tabelle mit Checkboxen (`☑` / `☐`): Wählen Sie genau die Dateien aus oder ab, die Sie drucken möchten.
+  - Interaktive Tabelle mit Checkboxen: Wählen Sie genau die Dateien aus oder ab, die Sie drucken möchten.
   - Buttons für „Alle auswählen“, „Auswahl aufheben“, „In Vorschau öffnen“ und „Im Finder zeigen“.
   - Unterstützung für beidseitigen Druck (**Duplex**) und Angabe der Kopienanzahl.
 - **Drag & Drop:**
@@ -25,21 +29,30 @@
 
 ---
 
-## 🚀 Schnellstart
+## 📦 Native Installation auf dem Mac
 
-### Methode 1: Per Doppelklick (Empfohlen)
-Doppelklicken Sie im Finder einfach auf:
+### Option 1: Automatischer Installer (Empfohlen)
+Führen Sie im Projektverzeichnis einfach den Installer aus:
 ```bash
-start.command
+./install.sh
 ```
-*Tipp:* Das Skript initialisiert beim ersten Start automatisch die virtuelle Umgebung (`.venv`) und startet direkt die grafische Oberfläche.
+Dies kopiert `VSCtoPDF.app` direkt in Ihren Programme-Ordner (`/Applications`). Danach ist das Programm sofort in **Spotlight**, **Launchpad** und im **Dock** verfügbar.
 
-### Methode 2: Über das Terminal
+### Option 2: Über das Apple Disk Image (.dmg)
+Öffnen Sie die erstellte Datei:
+> **`dist/VSCtoPDF.dmg`**
+
+Ziehen Sie das `VSCtoPDF`-Symbol einfach auf den Ordner `Applications`.
+
+### Option 3: Eigenständiges App-Bundle
+Sie können `dist/VSCtoPDF.app` auch direkt per Doppelklick starten.
+
+### Option 4: Aus Quellcode / Entwicklungsmodus
 ```bash
-# In das Projektverzeichnis wechseln
-cd /Users/mrgoldsmitt/Projekte/VSCtoPDF
+# Per Doppelklick:
+start.command
 
-# Programm starten
+# Oder im Terminal:
 .venv/bin/python main.py
 ```
 
@@ -54,15 +67,15 @@ cd /Users/mrgoldsmitt/Projekte/VSCtoPDF
    - **Farbschema:** Wählen Sie ein Syntax-Farbschema (z. B. `friendly` für augenfreundlichen Druck auf weißem Papier oder `bw` für Schwarz-Weiß).
 2. **Dateien oder Ordner hinzufügen:**
    - Ziehen Sie Dateien oder Ordner einfach per **Drag & Drop** in die Tabelle.
-   - Alternativ klicken Sie auf **`📄 Dateien hinzufügen...`** oder **`📁 Ordner hinzufügen...`**.
+   - Alternativ klicken Sie auf **`Dateien hinzufügen...`** oder **`Ordner hinzufügen...`**.
 3. **Konvertieren:**
-   - Klicken Sie auf den Button **`🚀 Alle Dateien als DIN-A4 PDF konvertieren`**.
+   - Klicken Sie auf **`Alle Dateien als DIN-A4 PDF konvertieren`**.
    - Die PDFs werden im jeweiligen Originalordner erstellt und die Seitenzahlen ermittelt.
 4. **Auswählen & Drucken:**
-   - In der ersten Spalte (`Drucken`) können Sie einzelne Dateien per Mausklick oder `Leertaste` an- oder abwählen (`☑` / `☐`).
-   - Nutzen Sie **`☑ Alle auswählen`** oder **`☐ Auswahl aufheben`**.
-   - Klicken Sie auf **`🖨️ Ausgewählte PDFs drucken`**, um die gewählten Dokumente direkt an den Drucker zu senden.
-   - Vorabkontrolle: Doppelklick auf eine Zeile oder **`👁 In Vorschau öffnen`** öffnet das PDF in der macOS Vorschau.
+   - In der ersten Spalte (`Drucken`) können Sie einzelne Dateien per Klick an- oder abwählen.
+   - Nutzen Sie **`Alle auswählen`** oder **`Auswahl aufheben`**.
+   - Klicken Sie auf **`Ausgewählte PDFs drucken`**, um die gewählten Dokumente direkt an den Drucker zu senden.
+   - Vorabkontrolle: Doppelklick auf eine Zeile oder **`In Vorschau öffnen`** öffnet das PDF in der macOS Vorschau.
 
 ---
 
@@ -72,24 +85,14 @@ Das Programm kann auch ohne grafische Oberfläche in Terminal-Skripten verwendet
 
 ```bash
 # Einzelne Datei konvertieren
-.venv/bin/python main.py script.py --word "MeinProjekt"
+./dist/VSCtoPDF.app/Contents/MacOS/VSCtoPDF script.py --word "MeinProjekt"
 
 # Ganzen Ordner konvertieren und direkt drucken
-.venv/bin/python main.py /pfad/zum/ordner --word "Vertraulich" --print
+./dist/VSCtoPDF.app/Contents/MacOS/VSCtoPDF /pfad/zum/ordner --word "Vertraulich" --print
 
 # Auf einem bestimmten Drucker mit 2 Kopien drucken
-.venv/bin/python main.py mein_ordner --print --printer "Brother_MFC_J5730DW" --copies 2
+./dist/VSCtoPDF.app/Contents/MacOS/VSCtoPDF mein_ordner --print --printer "Brother_MFC_J5730DW" --copies 2
 ```
-
-### CLI-Optionen
-- `inputs`: Beliebig viele Dateien oder Ordner
-- `-w, --word`: Text für die linke Fußzeile
-- `-s, --style`: Syntax-Farbschema (`friendly`, `default`, `colorful`, `bw`)
-- `-p, --print`: Direkt nach der Konvertierung drucken
-- `--printer`: Ziel-Drucker (Standard: System-Standarddrucker)
-- `-c, --copies`: Anzahl der Exemplare
-- `--simplex`: Einseitig drucken (Standard ist beidseitig Duplex)
-- `-g, --gui`: Startet die Benutzeroberfläche mit den angegebenen Pfaden
 
 ---
 
@@ -97,13 +100,31 @@ Das Programm kann auch ohne grafische Oberfläche in Terminal-Skripten verwendet
 
 ```
 VSCtoPDF/
-├── main.py              # Hauptprogramm (GUI & CLI Starter)
-├── gui.py               # Grafische Benutzeroberfläche (Tkinter & Drag&Drop)
+├── main.py              # Hauptprogramm (PySide6 GUI & CLI Starter)
+├── gui.py               # Native macOS GUI mit SVG-Icons & Drag & Drop
 ├── converter.py         # PDF-Engine (ReportLab, Pygments, A4, Kopf- & Fußzeile)
 ├── printer.py           # macOS Druckanbindung (CUPS, lpstat, lp)
-├── start.command        # Doppelklick-Starter für den macOS Finder
+├── start.command        # Doppelklick-Starter für Entwickler
+├── install.sh           # Nativer macOS-Installer nach /Applications
+├── build_app.sh         # Erstellt .app Bundle und .dmg Disk Image
 ├── requirements.txt     # Python-Abhängigkeiten
 ├── LICENSE              # CC BY-NC 4.0 Lizenz
+├── assets/              # Native Ressourcen
+│   ├── AppIcon.icns     # Multi-Resolution Retina App-Icon
+│   └── icons/           # Alle Icons im reinen SVG-Format
+│       ├── app_icon.svg
+│       ├── add_files.svg
+│       ├── add_folder.svg
+│       ├── delete.svg
+│       ├── clear.svg
+│       ├── convert.svg
+│       ├── print.svg
+│       ├── preview.svg
+│       ├── finder.svg
+│       ├── refresh.svg
+│       ├── select_all.svg
+│       ├── deselect_all.svg
+│       └── file_code.svg
 └── examples/            # Beispielprojekt zum Testen
     └── demo_project/
         ├── index.html
