@@ -8,13 +8,16 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
-echo "🔨 [1/3] Virtuelle Python-Umgebung prüfen..."
+VERSION="1.1.0"
+APP_NAME="VSCtoPDF"
+
+echo "🔨 [1/4] Virtuelle Python-Umgebung prüfen..."
 if [ ! -f ".venv/bin/python" ]; then
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt
 fi
 
-echo "🎨 [2/3] App-Icon (ICNS) aus SVG erzeugen..."
+echo "🎨 [2/4] App-Icon (ICNS) aus SVG erzeugen..."
 .venv/bin/python -c "
 import os, subprocess
 from PySide6.QtGui import QImage, QPainter
@@ -47,22 +50,32 @@ import shutil
 shutil.rmtree(icon_dir, ignore_errors=True)
 "
 
-echo "🚀 [3/3] Kompiliere VSCtoPDF.app mit PyInstaller..."
+echo "🚀 [3/4] Kompiliere VSCtoPDF.app v$VERSION mit PyInstaller..."
 .venv/bin/pyinstaller --noconfirm --windowed \
-    --name "VSCtoPDF" \
+    --name "$APP_NAME" \
     --icon "assets/AppIcon.icns" \
+    --osx-bundle-identifier "com.mrgoldsmitt.vsctopdf" \
     --add-data "assets:assets" \
     main.py
 
-echo "💿 Erstelle VSCtoPDF.dmg Disk Image..."
+# Info.plist Metadaten verfeinern
+PLIST="dist/$APP_NAME.app/Contents/Info.plist"
+if [ -f "$PLIST" ]; then
+    plutil -replace CFBundleShortVersionString -string "$VERSION" "$PLIST"
+    plutil -replace CFBundleVersion -string "$VERSION" "$PLIST"
+    plutil -replace CFBundleDisplayName -string "$APP_NAME" "$PLIST"
+    plutil -replace NSHumanReadableCopyright -string "Copyright © 2026 Sebastian (mrgoldsmitt). CC BY-NC 4.0" "$PLIST"
+fi
+
+echo "💿 [4/4] Erstelle VSCtoPDF.dmg Disk Image..."
 mkdir -p dist/dmg_staging
-cp -R dist/VSCtoPDF.app dist/dmg_staging/
+cp -R "dist/$APP_NAME.app" dist/dmg_staging/
 ln -s /Applications dist/dmg_staging/Applications
-hdiutil create -volname "VSCtoPDF" -srcfolder dist/dmg_staging -ov -format UDZO dist/VSCtoPDF.dmg
+hdiutil create -volname "$APP_NAME v$VERSION" -srcfolder dist/dmg_staging -ov -format UDZO "dist/$APP_NAME.dmg"
 rm -rf dist/dmg_staging
 
 echo ""
-echo "✅ Build erfolgreich fertiggestellt!"
-echo "   - App-Bundle:  dist/VSCtoPDF.app"
-echo "   - Installer:   dist/VSCtoPDF.dmg"
+echo "✅ Build v$VERSION erfolgreich fertiggestellt!"
+echo "   - App-Bundle:  dist/$APP_NAME.app"
+echo "   - Installer:   dist/$APP_NAME.dmg"
 echo "   - Installation: Führen Sie ./install.sh aus"

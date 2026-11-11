@@ -15,6 +15,7 @@ if BASE_DIR not in sys.path:
 
 from converter import convert_code_file_to_pdf
 from printer import get_installed_printers, print_pdf
+from version import APP_NAME, APP_VERSION, CHANGELOG_TEXT
 
 
 def run_cli(args):
@@ -75,6 +76,8 @@ def main():
         parser = argparse.ArgumentParser(
             description="Konvertiert Code-Dateien in DIN-A4 PDF und druckt sie optional auf macOS."
         )
+        parser.add_argument("-v", "--version", action="version", version=f"{APP_NAME} {APP_VERSION}")
+        parser.add_argument("--changelog", action="store_true", help="Zeigt den Changelog der Anwendung an")
         parser.add_argument("inputs", nargs="*", help="Dateien oder Ordner zur Konvertierung")
         parser.add_argument("--word", "-w", default="Code-Dokumentation", help="Benutzerwort in der linken Fußzeile")
         parser.add_argument("--style", "-s", default="friendly", help="Pygments Farbschema (friendly, default, bw, etc.)")
@@ -85,6 +88,11 @@ def main():
         parser.add_argument("--gui", "-g", action="store_true", help="GUI mit den übergebenen Dateien öffnen")
 
         args = parser.parse_args()
+
+        if args.changelog:
+            print(f"=== {APP_NAME} Changelog ===")
+            print(CHANGELOG_TEXT)
+            sys.exit(0)
 
         if args.gui or not args.inputs:
             from PySide6.QtWidgets import QApplication

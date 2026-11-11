@@ -14,11 +14,16 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QComboBox,
     QSpinBox, QCheckBox, QProgressBar, QLabel, QHeaderView, QMenu,
-    QFileDialog, QMessageBox, QGroupBox, QAbstractItemView
+    QFileDialog, QMessageBox, QGroupBox, QAbstractItemView, QDialog,
+    QTabWidget, QTextEdit
 )
 
 from converter import convert_code_file_to_pdf
 from printer import get_installed_printers, print_pdf, open_in_preview, reveal_in_finder
+from version import (
+    APP_NAME, APP_VERSION, APP_RELEASE_DATE, APP_AUTHOR,
+    APP_LICENSE, APP_GITHUB, APP_DESCRIPTION, CHANGELOG_TEXT
+)
 
 def get_icons_dir() -> str:
     """Ermittelt den Pfad zum Icon-Verzeichnis (funktioniert im Quellcode und als macOS .app)."""
@@ -169,10 +174,88 @@ class PrintingWorker(QThread):
         self.finished_all.emit(success, total)
 
 
+class AboutChangelogDialog(QDialog):
+    """Zeigt Versionsinformationen, Lizenz und den vollständigen Changelog an."""
+    def __init__(self, parent=None, initial_tab=0):
+        super().__init__(parent)
+        self.setWindowTitle(f"Über {APP_NAME} & Changelog")
+        self.setWindowIcon(get_icon("app_icon.svg"))
+        self.resize(650, 520)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+
+        # Header mit Icon und Basisinfos
+        top_layout = QHBoxLayout()
+        icon_lbl = QLabel()
+        icon_lbl.setPixmap(get_icon("app_icon.svg").pixmap(56, 56))
+        top_layout.addWidget(icon_lbl)
+
+        title_layout = QVBoxLayout()
+        title_lbl = QLabel(f"<h2 style='margin:0;'>{APP_NAME} <span style='font-size: 13pt; color: #2563eb;'>v{APP_VERSION}</span></h2>")
+        sub_lbl = QLabel(
+            f"<b>Autor:</b> {APP_AUTHOR} &nbsp;•&nbsp; <b>Stand:</b> {APP_RELEASE_DATE}<br>"
+            f"<b>Lizenz:</b> {APP_LICENSE} &nbsp;•&nbsp; <a href='{APP_GITHUB}'>GitHub Repository</a>"
+        )
+        sub_lbl.setOpenExternalLinks(True)
+        title_layout.addWidget(title_lbl)
+        title_layout.addWidget(sub_lbl)
+        top_layout.addLayout(title_layout)
+        top_layout.addStretch()
+        layout.addLayout(top_layout)
+
+        # Registerkarten (Changelog & Über)
+        tabs = QTabWidget()
+
+        # Tab 1: Changelog
+        tab_changelog = QWidget()
+        t_lay1 = QVBoxLayout(tab_changelog)
+        txt_change = QTextEdit()
+        txt_change.setReadOnly(True)
+        txt_change.setMarkdown(CHANGELOG_TEXT)
+        t_lay1.addWidget(txt_change)
+        tabs.addTab(tab_changelog, get_icon("info.svg"), "Changelog")
+
+        # Tab 2: Über das Programm
+        tab_about = QWidget()
+        t_lay2 = QVBoxLayout(tab_about)
+        txt_about = QTextEdit()
+        txt_about.setReadOnly(True)
+        about_md = f"""### {APP_NAME} – Version {APP_VERSION}
+
+{APP_DESCRIPTION}
+
+#### Hauptfunktionen:
+- **DIN-A4 PDF-Konvertierung:** Quellcodedateien (.py, .html, .css, .js, .ts, .json, etc.) mit Syntax-Highlighting und Zeilenumbruch.
+- **Kopfzeile:** Automatische Anzeige des vollständigen Ordnerpfads und des Dateinamens.
+- **Fußzeile:** Frei wählbares Wort (links) und exakte Nummerierung `Seite X/Gesamte Seiten` (rechts).
+- **Direktdruck auf macOS:** Direkte CUPS-Anbindung (`lp`) mit Druckerauswahl, Duplex-Option und Kopienanzahl.
+- **Benutzeroberfläche:** Reine SVG-Vektoricons, Retina-optimiert und native macOS Drag & Drop Unterstützung.
+
+#### Lizenz & Bedingungen (CC BY-NC 4.0):
+- **Teilen & Bearbeiten:** Gestattet bei Nennung des Urhebers (*Sebastian / mrgoldsmitt*).
+- **Nicht-kommerziell:** Eine kommerzielle Nutzung ist ausgeschlossen.
+"""
+        txt_about.setMarkdown(about_md)
+        t_lay2.addWidget(txt_about)
+        tabs.addTab(tab_about, get_icon("app_icon.svg"), "Über das Programm")
+
+        tabs.setCurrentIndex(initial_tab)
+        layout.addWidget(tabs)
+
+        # Schließen Button
+        btn_close = QPushButton("Schließen")
+        btn_close.clicked.connect(self.accept)
+        btn_box = QHBoxLayout()
+        btn_box.addStretch()
+        btn_box.addWidget(btn_close)
+        layout.addLayout(btn_box)
+
+
 class VSCtoPDFMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VSCtoPDF – Code zu DIN-A4 PDF & Direktdruck")
+        self.setWindowTitle(f"{APP_NAME} v{APP_VERSION} – Code zu DIN-A4 PDF & Direktdruck")
         self.setWindowIcon(get_icon("app_icon.svg"))
         self.resize(1080, 720)
         self.setMinimumSize(880, 520)
@@ -181,8 +264,25 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.file_items: Dict[str, Dict[str, Any]] = {}
         self.worker: Optional[QThread] = None
 
+        self.setup_menu()
         self.setup_ui()
         self.load_printers()
+
+    def setup_menu(self):
+        menu_bar = self.menuBar()
+        help_menu = menu_bar.addMenu("Hilfe")
+        
+        act_about = QAction(get_icon("app_icon.svg"), f"Über {APP_NAME}...", self)
+        act_about.triggered.connect(lambda: self.open_about_dialog(1))
+        help_menu.addAction(act_about)
+
+        act_changelog = QAction(get_icon("info.svg"), "Changelog...", self)
+        act_changelog.triggered.connect(lambda: self.open_about_dialog(0))
+        help_menu.addAction(act_changelog)
+
+    def open_about_dialog(self, initial_tab=0):
+        dlg = AboutChangelogDialog(self, initial_tab=initial_tab)
+        dlg.exec()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -226,6 +326,12 @@ class VSCtoPDFMainWindow(QMainWindow):
         row1.addWidget(self.combo_printer)
         row1.addWidget(self.btn_reload_printers)
         row1.addStretch()
+
+        self.btn_about = QPushButton(f"v{APP_VERSION} / Changelog")
+        self.btn_about.setIcon(get_icon("info.svg"))
+        self.btn_about.setToolTip("Versionsinformationen und Changelog anzeigen")
+        self.btn_about.clicked.connect(lambda: self.open_about_dialog(0))
+        row1.addWidget(self.btn_about)
         cfg_layout.addLayout(row1)
 
         # Zeile 2
