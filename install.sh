@@ -48,8 +48,10 @@ fi
 echo "✅ Installation erfolgreich abgeschlossen!"
 echo "   Sie finden 'VSCtoPDF' ab sofort im Launchpad, in Spotlight (Cmd+Leertaste) und im Programme-Ordner."
 echo ""
-read -p "Möchten Sie VSCtoPDF jetzt starten? (J/n): " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[JjYy]$ ]] || [[ -z $REPLY ]]; then
-    open "$TARGET_DIR/VSCtoPDF.app"
+if [ -t 0 ]; then
+    read -t 10 -p "Möchten Sie VSCtoPDF jetzt starten? (J/n): " -n 1 -r || true
+    echo ""
+    if [[ $REPLY =~ ^[JjYy]$ ]] || [[ -z $REPLY ]]; then
+        open "$TARGET_DIR/VSCtoPDF.app"
+    fi
 fi
