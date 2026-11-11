@@ -1,0 +1,6 @@
+charset-normalizer==3.5.2
+pillow==13.0.0
+Pygments==2.21.0
+pypdf==7.0.1
+reportlab==5.1.0
+tkinterdnd2==0.7.0
