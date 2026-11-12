@@ -7,6 +7,15 @@ und dieses Projekt folgt der [semantischen Versionierung](https://semver.org/lan
 
 ---
 
+## [1.1.3] - 2026-11-12
+
+### Verbessert & Optimiert
+- **macOS System-Menüleiste:** Menü für Version, Changelog und GitHub vollständig in die native macOS-Menüleiste am oberen Bildschirmrand integriert (mit Standard-Menüs *Ablage*, *Bearbeiten* und *Hilfe* sowie Tastatur-Shortcuts wie Cmd+O, Cmd+P, Cmd+A, Cmd+W) – der Menü-Button im Fenster wurde entfernt.
+- **Hinweistext ohne Button-Optik:** Der Hinweis *„x von y Dateien zum Drucken“* wird als reiner Text in weißer Schrift ohne Button-Hintergrund dargestellt.
+- **Button-Umbenennung:** Der Button *„Ausgewählte PDFs drucken“* wurde in *„PDFs drucken“* umbenannt.
+
+---
+
 ## [1.1.2] - 2026-11-12
 
 ### Hinzugefügt & Verbessert

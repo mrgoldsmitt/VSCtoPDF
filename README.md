@@ -12,8 +12,8 @@
   Alle Icons der Benutzeroberfläche sind moderne, skalierbare SVG-Dateien (`assets/icons/`), die auch auf Retina-Displays gestochen scharf dargestellt werden.
 - **Interaktive Tabellen-Spalten & Vollständige Pfadanzeige:**
   Spaltenbreiten lassen sich stufenlos mit der Maus anpassen. Dateipfade und PDF-Pfade werden mit Tooltip und Kontextmenü vollständig bereitgestellt.
-- **Integrierte Menüführung & Versionsverwaltung:**
-  Über das Menü (`v1.1.1 ▾`) in der Kopfzeile können Versionsdetails, Changelog, GitHub-Repository und Releases direkt aufgerufen werden.
+- **Native macOS-Menüleiste & Versionsverwaltung:**
+  Sämtliche Funktionen, Versionsdetails, Changelog und GitHub-Links sind nativ in der Mac-Menüleiste am oberen Bildschirmrand (Ablage, Bearbeiten, Hilfe) mit Tastatur-Shortcuts (Cmd+O, Cmd+P, Cmd+A, Cmd+W) integriert.
 - **DIN-A4 Format mit Zeilennummern & Syntax-Highlighting:**
   Jede Datei wird exakt auf DIN-A4 Seitenbreite formatiert. Lange Codezeilen brechen automatisch und sauber um. Zeilennummern und Syntax-Hervorhebung sorgen für perfekte Lesbarkeit auf Papier.
 - **Kopfzeile (Header):**
@@ -78,7 +78,7 @@ start.command
 4. **Auswählen & Drucken:**
    - In der ersten Spalte (`Drucken`) können Sie einzelne Dateien per Klick an- oder abwählen.
    - Nutzen Sie **`Alle auswählen`** oder **`Auswahl aufheben`**.
-   - Klicken Sie auf **`Ausgewählte PDFs drucken`**, um die gewählten Dokumente direkt an den Drucker zu senden.
+   - Klicken Sie auf **`PDFs drucken`**, um die gewählten Dokumente direkt an den Drucker zu senden.
    - Vorabkontrolle: Doppelklick auf eine Zeile oder **`In Vorschau öffnen`** öffnet das PDF in der macOS Vorschau.
 
 ---

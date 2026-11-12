@@ -9,7 +9,7 @@ import subprocess
 from typing import List, Dict, Any, Optional
 
 from PySide6.QtCore import Qt, QSize, QThread, Signal, QUrl
-from PySide6.QtGui import QIcon, QAction, QDesktopServices
+from PySide6.QtGui import QIcon, QAction, QDesktopServices, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QComboBox,
@@ -264,15 +264,80 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.file_items: Dict[str, Dict[str, Any]] = {}
         self.worker: Optional[QThread] = None
 
-        self.setup_menu()
         self.setup_ui()
+        self.setup_menu()
         self.load_printers()
 
     def setup_menu(self):
         menu_bar = self.menuBar()
+
+        # -------------------------------------------------------------------
+        # Menü: Ablage
+        # -------------------------------------------------------------------
+        file_menu = menu_bar.addMenu("Ablage")
+        
+        act_add_files = QAction(get_icon("add_files.svg"), "Dateien hinzufügen...", self)
+        act_add_files.setShortcut(QKeySequence.Open)
+        act_add_files.triggered.connect(self.add_files_dialog)
+        file_menu.addAction(act_add_files)
+
+        act_add_folder = QAction(get_icon("add_folder.svg"), "Ordner hinzufügen...", self)
+        act_add_folder.setShortcut(QKeySequence("Ctrl+Shift+O"))
+        act_add_folder.triggered.connect(self.add_folder_dialog)
+        file_menu.addAction(act_add_folder)
+
+        file_menu.addSeparator()
+
+        act_conv = QAction(get_icon("convert.svg"), "Alle Dateien als PDF konvertieren", self)
+        act_conv.setShortcut(QKeySequence("Ctrl+K"))
+        act_conv.triggered.connect(self.start_conversion)
+        file_menu.addAction(act_conv)
+
+        act_print = QAction(get_icon("print.svg"), "PDFs drucken...", self)
+        act_print.setShortcut(QKeySequence.Print)
+        act_print.triggered.connect(self.start_printing)
+        file_menu.addAction(act_print)
+
+        file_menu.addSeparator()
+
+        act_close = QAction("Fenster schließen", self)
+        act_close.setShortcut(QKeySequence.Close)
+        act_close.triggered.connect(self.close)
+        file_menu.addAction(act_close)
+
+        # -------------------------------------------------------------------
+        # Menü: Bearbeiten
+        # -------------------------------------------------------------------
+        edit_menu = menu_bar.addMenu("Bearbeiten")
+
+        act_sel_all = QAction(get_icon("select_all.svg"), "Alle zum Drucken auswählen", self)
+        act_sel_all.setShortcut(QKeySequence.SelectAll)
+        act_sel_all.triggered.connect(self.select_all_for_print)
+        edit_menu.addAction(act_sel_all)
+
+        act_desel_all = QAction(get_icon("deselect_all.svg"), "Auswahl aufheben", self)
+        act_desel_all.setShortcut(QKeySequence("Ctrl+Shift+A"))
+        act_desel_all.triggered.connect(self.deselect_all_for_print)
+        edit_menu.addAction(act_desel_all)
+
+        edit_menu.addSeparator()
+
+        act_remove = QAction(get_icon("delete.svg"), "Aus Liste entfernen", self)
+        act_remove.setShortcut(QKeySequence.Delete)
+        act_remove.triggered.connect(self.remove_selected_from_list)
+        edit_menu.addAction(act_remove)
+
+        act_clear = QAction(get_icon("clear.svg"), "Liste leeren", self)
+        act_clear.triggered.connect(self.clear_list)
+        edit_menu.addAction(act_clear)
+
+        # -------------------------------------------------------------------
+        # Menü: Hilfe & Version
+        # -------------------------------------------------------------------
         help_menu = menu_bar.addMenu("Hilfe")
         
-        act_about = QAction(get_icon("app_icon.svg"), f"Über {APP_NAME} (v{APP_VERSION})...", self)
+        act_about = QAction(get_icon("info.svg"), f"Über {APP_NAME} (v{APP_VERSION})...", self)
+        act_about.setMenuRole(QAction.AboutRole)
         act_about.triggered.connect(lambda: self.open_about_dialog(1))
         help_menu.addAction(act_about)
 
@@ -336,35 +401,6 @@ class VSCtoPDFMainWindow(QMainWindow):
         row1.addWidget(self.combo_printer)
         row1.addWidget(self.btn_reload_printers)
         row1.addStretch()
-
-        # Menü-Button für Version, Changelog und GitHub
-        self.btn_menu = QPushButton(f" Menü (v{APP_VERSION}) ▾")
-        self.btn_menu.setIcon(get_icon("menu.svg"))
-        self.btn_menu.setIconSize(QSize(16, 16))
-        self.btn_menu.setToolTip("Version, Changelog und GitHub-Links öffnen")
-        self.btn_menu.setStyleSheet("font-size: 11px; font-weight: bold; padding: 4px 10px;")
-
-        app_dropdown = QMenu(self)
-        act_ver = QAction(get_icon("info.svg"), f"Über VSCtoPDF (v{APP_VERSION})...", self)
-        act_ver.triggered.connect(lambda: self.open_about_dialog(1))
-        app_dropdown.addAction(act_ver)
-
-        act_log = QAction(get_icon("changelog.svg"), "Changelog anzeigen...", self)
-        act_log.triggered.connect(lambda: self.open_about_dialog(0))
-        app_dropdown.addAction(act_log)
-
-        app_dropdown.addSeparator()
-
-        act_git = QAction(get_icon("github.svg"), "GitHub Repository öffnen", self)
-        act_git.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(APP_GITHUB)))
-        app_dropdown.addAction(act_git)
-
-        act_rel = QAction(get_icon("download.svg"), "GitHub Releases & DMG Download", self)
-        act_rel.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(f"{APP_GITHUB}/releases")))
-        app_dropdown.addAction(act_rel)
-
-        self.btn_menu.setMenu(app_dropdown)
-        row1.addWidget(self.btn_menu)
         cfg_layout.addLayout(row1)
 
         # Zeile 2
@@ -523,11 +559,11 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.btn_desel_all.setIcon(get_icon("deselect_all.svg"))
         self.btn_desel_all.clicked.connect(self.deselect_all_for_print)
 
-        # Button-Schriftgröße verkleinert, damit der Text perfekt auf den Button passt
-        self.btn_print = QPushButton("Ausgewählte PDFs drucken")
+        # Button: PDFs drucken
+        self.btn_print = QPushButton("PDFs drucken")
         self.btn_print.setIcon(get_icon("print.svg"))
-        self.btn_print.setIconSize(QSize(16, 16))
-        self.btn_print.setStyleSheet("font-size: 11px; font-weight: bold; padding: 5px 10px;")
+        self.btn_print.setIconSize(QSize(18, 18))
+        self.btn_print.setStyleSheet("font-weight: bold; padding: 6px 14px;")
         self.btn_print.clicked.connect(self.start_printing)
 
         self.btn_preview = QPushButton("In Vorschau öffnen")
@@ -538,22 +574,16 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.btn_finder.setIcon(get_icon("finder.svg"))
         self.btn_finder.clicked.connect(self.reveal_current_in_finder)
 
-        # Hinweis "x Dateien zum Drucken" mit weißer Schriftfarbe auf dezentem Badge
-        self.lbl_selection_count = QLabel("0 Dateien zum Drucken ausgewählt")
+        # Hinweis "x Dateien zum Drucken" - Reiner weißer Text, sieht NICHT wie ein Button aus
+        self.lbl_selection_count = QLabel("0 Dateien zum Drucken")
         self.lbl_selection_count.setStyleSheet(
-            "background-color: #1d4ed8; color: #ffffff; font-weight: bold; font-size: 11px; padding: 5px 12px; border-radius: 6px;"
+            "color: #ffffff; font-size: 13px; font-weight: bold; background: transparent; border: none; padding: 0;"
         )
 
         print_layout.addWidget(self.btn_sel_all)
         print_layout.addWidget(self.btn_desel_all)
         print_layout.addSpacing(10)
         print_layout.addWidget(self.btn_print)
-        print_layout.addWidget(self.btn_preview)
-        print_layout.addWidget(self.btn_finder)
-        print_layout.addStretch()
-        print_layout.addWidget(self.lbl_selection_count)
-
-        main_layout.addWidget(print_group)
         print_layout.addWidget(self.btn_preview)
         print_layout.addWidget(self.btn_finder)
         print_layout.addStretch()
@@ -774,7 +804,7 @@ class VSCtoPDFMainWindow(QMainWindow):
     def update_selection_label(self):
         count = sum(1 for it in self.file_items.values() if it["selected"])
         total = len(self.file_items)
-        self.lbl_selection_count.setText(f"{count} von {total} Dateien zum Drucken ausgewählt")
+        self.lbl_selection_count.setText(f"{count} von {total} Dateien zum Drucken")
 
     # -----------------------------------------------------------------------
     # Vorschau & Finder Integration
