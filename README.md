@@ -137,6 +137,7 @@ VSCtoPDF/
 │       ├── info.svg
 │       ├── lightbulb.svg
 │       ├── copy.svg
+│       ├── folder.svg
 │       └── download.svg
 └── examples/            # Beispielprojekt zum Testen
     └── demo_project/

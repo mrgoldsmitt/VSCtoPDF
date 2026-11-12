@@ -7,6 +7,15 @@ und dieses Projekt folgt der [semantischen Versionierung](https://semver.org/lan
 
 ---
 
+## [1.1.2] - 2026-11-12
+
+### Hinzugefügt & Verbessert
+- **Neue Tabellenspalte 'Ordner-Name':** Zeigt den Namen des übergeordneten Ordners (z. B. `demo_project`) direkt und übersichtlich als eigene Spalte neben Dateiname und Dateityp an.
+- **Erweitertes Kontextmenü:** Neue Schnellaktion *„Ordner-Name kopieren“* (zusätzlich zu *„Ordner-Pfad kopieren“* und *„PDF-Pfad kopieren“*).
+- **Neues SVG-Icon:** Reines Vektorsymbol `folder.svg` für Verzeichnisse in der Tabelle.
+
+---
+
 ## [1.1.1] - 2026-11-12
 
 ### Verbessert & Hinzugefügt

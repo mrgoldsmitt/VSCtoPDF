@@ -454,26 +454,27 @@ class VSCtoPDFMainWindow(QMainWindow):
         # -------------------------------------------------------------------
         # 3. Datei-Tabelle mit frei anpassbaren Spaltenbreiten
         # -------------------------------------------------------------------
-        self.table = QTableWidget(0, 7)
+        self.table = QTableWidget(0, 8)
         self.table.setHorizontalHeaderLabels([
-            "Drucken", "Dateiname", "Dateityp", "Ordner-Pfad", "Seiten", "Status", "PDF-Pfad"
+            "Drucken", "Dateiname", "Dateityp", "Ordner-Name", "Ordner-Pfad", "Seiten", "Status", "PDF-Pfad"
         ])
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # Alle Spaltenbreiten mit der Maus stufenlos veränderbar machen
         header = self.table.horizontalHeader()
-        for col_idx in range(7):
+        for col_idx in range(8):
             header.setSectionResizeMode(col_idx, QHeaderView.Interactive)
         header.setSectionsMovable(True)
 
         self.table.setColumnWidth(0, 65)   # Checkbox
-        self.table.setColumnWidth(1, 180)  # Dateiname
-        self.table.setColumnWidth(2, 75)   # Typ
-        self.table.setColumnWidth(3, 320)  # Ordner-Pfad (vollständig sichtbar & vergrößerbar)
-        self.table.setColumnWidth(4, 65)   # Seiten
-        self.table.setColumnWidth(5, 110)  # Status
-        self.table.setColumnWidth(6, 260)  # PDF-Pfad
+        self.table.setColumnWidth(1, 170)  # Dateiname
+        self.table.setColumnWidth(2, 70)   # Typ
+        self.table.setColumnWidth(3, 140)  # Ordner-Name
+        self.table.setColumnWidth(4, 250)  # Ordner-Pfad (vollständig sichtbar & vergrößerbar)
+        self.table.setColumnWidth(5, 65)   # Seiten
+        self.table.setColumnWidth(6, 110)  # Status
+        self.table.setColumnWidth(7, 240)  # PDF-Pfad
 
         self.table.itemClicked.connect(self.on_table_item_clicked)
         self.table.itemDoubleClicked.connect(self.on_table_double_clicked)
@@ -644,6 +645,7 @@ class VSCtoPDFMainWindow(QMainWindow):
         ext = os.path.splitext(file_path)[1].lower()
         type_str = ext[1:].upper() if ext else "TEXT"
         folder_path = os.path.dirname(file_path)
+        folder_name = os.path.basename(folder_path) or folder_path
         name = os.path.basename(file_path)
         pdf_path = file_path + ".pdf"
         has_pdf = os.path.exists(pdf_path)
@@ -664,6 +666,10 @@ class VSCtoPDFMainWindow(QMainWindow):
         type_item = QTableWidgetItem(type_str)
         type_item.setTextAlignment(Qt.AlignCenter)
 
+        folder_name_item = QTableWidgetItem(folder_name)
+        folder_name_item.setIcon(get_icon("folder.svg"))
+        folder_name_item.setToolTip(f"Ordner: {folder_name}\nVollständiger Pfad:\n{folder_path}")
+
         folder_item = QTableWidgetItem(folder_path)
         folder_item.setToolTip(f"Vollständiger Ordner-Pfad:\n{folder_path}")
 
@@ -679,15 +685,17 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.table.setItem(row, 0, chk_item)
         self.table.setItem(row, 1, name_item)
         self.table.setItem(row, 2, type_item)
-        self.table.setItem(row, 3, folder_item)
-        self.table.setItem(row, 4, pages_item)
-        self.table.setItem(row, 5, status_item)
-        self.table.setItem(row, 6, pdf_item)
+        self.table.setItem(row, 3, folder_name_item)
+        self.table.setItem(row, 4, folder_item)
+        self.table.setItem(row, 5, pages_item)
+        self.table.setItem(row, 6, status_item)
+        self.table.setItem(row, 7, pdf_item)
 
         self.file_items[file_path] = {
             "row": row,
             "path": file_path,
             "folder": folder_path,
+            "folder_name": folder_name,
             "name": name,
             "type": type_str,
             "selected": selected,
@@ -725,11 +733,12 @@ class VSCtoPDFMainWindow(QMainWindow):
 
     def _reindex_rows(self):
         for r in range(self.table.rowCount()):
-            folder = self.table.item(r, 3).text()
-            name = self.table.item(r, 1).text()
-            p = os.path.join(folder, name)
-            if p in self.file_items:
-                self.file_items[p]["row"] = r
+            folder_item = self.table.item(r, 4)
+            name_item = self.table.item(r, 1)
+            if folder_item and name_item:
+                p = os.path.join(folder_item.text(), name_item.text())
+                if p in self.file_items:
+                    self.file_items[p]["row"] = r
 
     # -----------------------------------------------------------------------
     # Auswahl-Interaktionen
@@ -803,6 +812,16 @@ class VSCtoPDFMainWindow(QMainWindow):
                 reveal_in_finder(target)
                 break
 
+    def copy_current_folder_name(self):
+        curr_row = self.table.currentRow()
+        if curr_row >= 0:
+            for it in self.file_items.values():
+                if it["row"] == curr_row:
+                    fn = it.get("folder_name", os.path.basename(it["folder"]))
+                    QApplication.clipboard().setText(fn)
+                    self.lbl_status.setText(f"Ordner-Name kopiert: {fn}")
+                    break
+
     def copy_current_folder_path(self):
         curr_row = self.table.currentRow()
         if curr_row >= 0:
@@ -832,6 +851,9 @@ class VSCtoPDFMainWindow(QMainWindow):
         act_finder = QAction(get_icon("finder.svg"), "Im Finder zeigen", self)
         act_finder.triggered.connect(self.reveal_current_in_finder)
 
+        act_copy_name = QAction(get_icon("folder.svg"), "Ordner-Name kopieren", self)
+        act_copy_name.triggered.connect(self.copy_current_folder_name)
+
         act_copy_folder = QAction(get_icon("copy.svg"), "Ordner-Pfad kopieren", self)
         act_copy_folder.triggered.connect(self.copy_current_folder_path)
 
@@ -844,6 +866,7 @@ class VSCtoPDFMainWindow(QMainWindow):
         menu.addAction(act_preview)
         menu.addAction(act_finder)
         menu.addSeparator()
+        menu.addAction(act_copy_name)
         menu.addAction(act_copy_folder)
         menu.addAction(act_copy_pdf)
         menu.addSeparator()
@@ -882,16 +905,16 @@ class VSCtoPDFMainWindow(QMainWindow):
         chk = self.table.item(r, 0)
         if chk:
             chk.setCheckState(Qt.Checked if item["selected"] else Qt.Unchecked)
-        # Spalte 4 (Seiten)
-        p_item = self.table.item(r, 4)
+        # Spalte 5 (Seiten)
+        p_item = self.table.item(r, 5)
         if p_item:
             p_item.setText(item["pages"])
-        # Spalte 5 (Status)
-        s_item = self.table.item(r, 5)
+        # Spalte 6 (Status)
+        s_item = self.table.item(r, 6)
         if s_item:
             s_item.setText(item["status"])
-        # Spalte 6 (PDF-Pfad)
-        pdf_item = self.table.item(r, 6)
+        # Spalte 7 (PDF-Pfad)
+        pdf_item = self.table.item(r, 7)
         if pdf_item:
             pdf_item.setText(item["pdf_path"])
             pdf_item.setToolTip(f"Vollständiger PDF-Pfad:\n{item['pdf_path']}")
@@ -953,7 +976,7 @@ class VSCtoPDFMainWindow(QMainWindow):
 
     def _on_print_item_finished(self, item: Dict[str, Any]):
         r = item["row"]
-        s_item = self.table.item(r, 5)
+        s_item = self.table.item(r, 6)
         if s_item:
             s_item.setText(item["status"])
 

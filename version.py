@@ -3,14 +3,20 @@ version.py - Versionsinformationen und Metadaten für VSCtoPDF.
 """
 
 APP_NAME = "VSCtoPDF"
-APP_VERSION = "1.1.1"
+APP_VERSION = "1.1.2"
 APP_RELEASE_DATE = "12.11.2026"
 APP_AUTHOR = "Sebastian (mrgoldsmitt)"
 APP_LICENSE = "Creative Commons CC BY-NC 4.0"
 APP_GITHUB = "https://github.com/mrgoldsmitt/VSCtoPDF"
 APP_DESCRIPTION = "Natives macOS-Tool zum Konvertieren von Code-Dateien in DIN-A4 PDF mit Kopf-/Fußzeile & Direktdruck."
 
-CHANGELOG_TEXT = """## [1.1.1] - 2026-11-12
+CHANGELOG_TEXT = """## [1.1.2] - 2026-11-12
+### Hinzugefügt & Verbessert
+- **Neue Tabellenspalte 'Ordner-Name':** Zeigt den Namen des übergeordneten Ordners (z. B. 'demo_project') direkt und übersichtlich als eigene Spalte neben Dateiname und Dateityp an.
+- **Erweitertes Kontextmenü:** Neue Schnellaktion 'Ordner-Name kopieren' (zusätzlich zu 'Ordner-Pfad kopieren' und 'PDF-Pfad kopieren').
+- **Neues SVG-Icon:** Reines Vektorsymbol `folder.svg` für Verzeichnisse in der Tabelle.
+
+## [1.1.1] - 2026-11-12
 ### Verbessert & Hinzugefügt
 - **Manuelle Spaltenbreiten-Anpassung:** Alle Spalten der Dateitabelle können nun frei mit der Maus vergrößert oder verkleinert werden (`QHeaderView.Interactive`).
 - **Neues Dropdown-Menü:** Version, Changelog und direkte GitHub-Links sind in einem kompakten Menü-Button (`Menü ▾`) direkt erreichbar.
