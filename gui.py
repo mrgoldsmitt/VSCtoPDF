@@ -8,8 +8,8 @@ import sys
 import subprocess
 from typing import List, Dict, Any, Optional
 
-from PySide6.QtCore import Qt, QSize, QThread, Signal
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtCore import Qt, QSize, QThread, Signal, QUrl
+from PySide6.QtGui import QIcon, QAction, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QComboBox,
@@ -272,13 +272,23 @@ class VSCtoPDFMainWindow(QMainWindow):
         menu_bar = self.menuBar()
         help_menu = menu_bar.addMenu("Hilfe")
         
-        act_about = QAction(get_icon("app_icon.svg"), f"Über {APP_NAME}...", self)
+        act_about = QAction(get_icon("app_icon.svg"), f"Über {APP_NAME} (v{APP_VERSION})...", self)
         act_about.triggered.connect(lambda: self.open_about_dialog(1))
         help_menu.addAction(act_about)
 
-        act_changelog = QAction(get_icon("info.svg"), "Changelog...", self)
+        act_changelog = QAction(get_icon("changelog.svg"), "Changelog anzeigen...", self)
         act_changelog.triggered.connect(lambda: self.open_about_dialog(0))
         help_menu.addAction(act_changelog)
+
+        help_menu.addSeparator()
+
+        act_git = QAction(get_icon("github.svg"), "GitHub Repository öffnen", self)
+        act_git.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(APP_GITHUB)))
+        help_menu.addAction(act_git)
+
+        act_rel = QAction(get_icon("download.svg"), "GitHub Releases & Downloads", self)
+        act_rel.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(f"{APP_GITHUB}/releases")))
+        help_menu.addAction(act_rel)
 
     def open_about_dialog(self, initial_tab=0):
         dlg = AboutChangelogDialog(self, initial_tab=initial_tab)
@@ -327,11 +337,34 @@ class VSCtoPDFMainWindow(QMainWindow):
         row1.addWidget(self.btn_reload_printers)
         row1.addStretch()
 
-        self.btn_about = QPushButton(f"v{APP_VERSION} / Changelog")
-        self.btn_about.setIcon(get_icon("info.svg"))
-        self.btn_about.setToolTip("Versionsinformationen und Changelog anzeigen")
-        self.btn_about.clicked.connect(lambda: self.open_about_dialog(0))
-        row1.addWidget(self.btn_about)
+        # Menü-Button für Version, Changelog und GitHub
+        self.btn_menu = QPushButton(f" Menü (v{APP_VERSION}) ▾")
+        self.btn_menu.setIcon(get_icon("menu.svg"))
+        self.btn_menu.setIconSize(QSize(16, 16))
+        self.btn_menu.setToolTip("Version, Changelog und GitHub-Links öffnen")
+        self.btn_menu.setStyleSheet("font-size: 11px; font-weight: bold; padding: 4px 10px;")
+
+        app_dropdown = QMenu(self)
+        act_ver = QAction(get_icon("info.svg"), f"Über VSCtoPDF (v{APP_VERSION})...", self)
+        act_ver.triggered.connect(lambda: self.open_about_dialog(1))
+        app_dropdown.addAction(act_ver)
+
+        act_log = QAction(get_icon("changelog.svg"), "Changelog anzeigen...", self)
+        act_log.triggered.connect(lambda: self.open_about_dialog(0))
+        app_dropdown.addAction(act_log)
+
+        app_dropdown.addSeparator()
+
+        act_git = QAction(get_icon("github.svg"), "GitHub Repository öffnen", self)
+        act_git.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(APP_GITHUB)))
+        app_dropdown.addAction(act_git)
+
+        act_rel = QAction(get_icon("download.svg"), "GitHub Releases & DMG Download", self)
+        act_rel.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(f"{APP_GITHUB}/releases")))
+        app_dropdown.addAction(act_rel)
+
+        self.btn_menu.setMenu(app_dropdown)
+        row1.addWidget(self.btn_menu)
         cfg_layout.addLayout(row1)
 
         # Zeile 2
@@ -352,8 +385,14 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.spin_copies.setValue(1)
         self.spin_copies.setFixedWidth(65)
 
-        lbl_info = QLabel("ℹ️ DIN-A4 Kopfzeile enthält automatisch den Ordner-Pfad.")
+        info_box = QHBoxLayout()
+        info_box.setSpacing(5)
+        lbl_info_icon = QLabel()
+        lbl_info_icon.setPixmap(get_icon("info.svg").pixmap(14, 14))
+        lbl_info = QLabel("DIN-A4 Kopfzeile enthält automatisch den vollständigen Ordner-Pfad.")
         lbl_info.setStyleSheet("color: #64748b; font-size: 11px;")
+        info_box.addWidget(lbl_info_icon)
+        info_box.addWidget(lbl_info)
 
         row2.addWidget(lbl_style)
         row2.addWidget(self.combo_style)
@@ -363,7 +402,7 @@ class VSCtoPDFMainWindow(QMainWindow):
         row2.addWidget(lbl_copies)
         row2.addWidget(self.spin_copies)
         row2.addStretch()
-        row2.addWidget(lbl_info)
+        row2.addLayout(info_box)
         cfg_layout.addLayout(row2)
 
         main_layout.addWidget(cfg_group)
@@ -394,8 +433,14 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.btn_clear.setIconSize(QSize(18, 18))
         self.btn_clear.clicked.connect(self.clear_list)
 
-        lbl_dnd_hint = QLabel("💡 Dateien oder Ordner einfach per Drag & Drop hier hineinziehen!")
-        lbl_dnd_hint.setStyleSheet("color: #2563eb; font-style: italic;")
+        dnd_box = QHBoxLayout()
+        dnd_box.setSpacing(6)
+        lbl_dnd_icon = QLabel()
+        lbl_dnd_icon.setPixmap(get_icon("lightbulb.svg").pixmap(16, 16))
+        lbl_dnd_hint = QLabel("Dateien oder Ordner einfach per Drag & Drop hier hineinziehen!")
+        lbl_dnd_hint.setStyleSheet("color: #2563eb; font-style: italic; font-size: 11px;")
+        dnd_box.addWidget(lbl_dnd_icon)
+        dnd_box.addWidget(lbl_dnd_hint)
 
         btn_bar.addWidget(self.btn_add_files)
         btn_bar.addWidget(self.btn_add_folder)
@@ -403,11 +448,11 @@ class VSCtoPDFMainWindow(QMainWindow):
         btn_bar.addWidget(self.btn_remove)
         btn_bar.addWidget(self.btn_clear)
         btn_bar.addStretch()
-        btn_bar.addWidget(lbl_dnd_hint)
+        btn_bar.addLayout(dnd_box)
         main_layout.addLayout(btn_bar)
 
         # -------------------------------------------------------------------
-        # 3. Datei-Tabelle mit Checkboxen
+        # 3. Datei-Tabelle mit frei anpassbaren Spaltenbreiten
         # -------------------------------------------------------------------
         self.table = QTableWidget(0, 7)
         self.table.setHorizontalHeaderLabels([
@@ -415,15 +460,20 @@ class VSCtoPDFMainWindow(QMainWindow):
         ])
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Interactive)
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Interactive)
-        self.table.setColumnWidth(1, 200)
-        self.table.setColumnWidth(6, 220)
+
+        # Alle Spaltenbreiten mit der Maus stufenlos veränderbar machen
+        header = self.table.horizontalHeader()
+        for col_idx in range(7):
+            header.setSectionResizeMode(col_idx, QHeaderView.Interactive)
+        header.setSectionsMovable(True)
+
+        self.table.setColumnWidth(0, 65)   # Checkbox
+        self.table.setColumnWidth(1, 180)  # Dateiname
+        self.table.setColumnWidth(2, 75)   # Typ
+        self.table.setColumnWidth(3, 320)  # Ordner-Pfad (vollständig sichtbar & vergrößerbar)
+        self.table.setColumnWidth(4, 65)   # Seiten
+        self.table.setColumnWidth(5, 110)  # Status
+        self.table.setColumnWidth(6, 260)  # PDF-Pfad
 
         self.table.itemClicked.connect(self.on_table_item_clicked)
         self.table.itemDoubleClicked.connect(self.on_table_double_clicked)
@@ -472,10 +522,11 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.btn_desel_all.setIcon(get_icon("deselect_all.svg"))
         self.btn_desel_all.clicked.connect(self.deselect_all_for_print)
 
+        # Button-Schriftgröße verkleinert, damit der Text perfekt auf den Button passt
         self.btn_print = QPushButton("Ausgewählte PDFs drucken")
         self.btn_print.setIcon(get_icon("print.svg"))
-        self.btn_print.setIconSize(QSize(20, 20))
-        self.btn_print.setStyleSheet("font-weight: bold; padding: 6px 14px;")
+        self.btn_print.setIconSize(QSize(16, 16))
+        self.btn_print.setStyleSheet("font-size: 11px; font-weight: bold; padding: 5px 10px;")
         self.btn_print.clicked.connect(self.start_printing)
 
         self.btn_preview = QPushButton("In Vorschau öffnen")
@@ -486,13 +537,22 @@ class VSCtoPDFMainWindow(QMainWindow):
         self.btn_finder.setIcon(get_icon("finder.svg"))
         self.btn_finder.clicked.connect(self.reveal_current_in_finder)
 
+        # Hinweis "x Dateien zum Drucken" mit weißer Schriftfarbe auf dezentem Badge
         self.lbl_selection_count = QLabel("0 Dateien zum Drucken ausgewählt")
-        self.lbl_selection_count.setStyleSheet("font-weight: bold; color: #1e3a8a;")
+        self.lbl_selection_count.setStyleSheet(
+            "background-color: #1d4ed8; color: #ffffff; font-weight: bold; font-size: 11px; padding: 5px 12px; border-radius: 6px;"
+        )
 
         print_layout.addWidget(self.btn_sel_all)
         print_layout.addWidget(self.btn_desel_all)
         print_layout.addSpacing(10)
         print_layout.addWidget(self.btn_print)
+        print_layout.addWidget(self.btn_preview)
+        print_layout.addWidget(self.btn_finder)
+        print_layout.addStretch()
+        print_layout.addWidget(self.lbl_selection_count)
+
+        main_layout.addWidget(print_group)
         print_layout.addWidget(self.btn_preview)
         print_layout.addWidget(self.btn_finder)
         print_layout.addStretch()
@@ -599,11 +659,13 @@ class VSCtoPDFMainWindow(QMainWindow):
 
         name_item = QTableWidgetItem(name)
         name_item.setIcon(get_icon("file_code.svg"))
+        name_item.setToolTip(f"Datei: {name}\nVollständiger Pfad:\n{file_path}")
 
         type_item = QTableWidgetItem(type_str)
         type_item.setTextAlignment(Qt.AlignCenter)
 
         folder_item = QTableWidgetItem(folder_path)
+        folder_item.setToolTip(f"Vollständiger Ordner-Pfad:\n{folder_path}")
 
         pages_item = QTableWidgetItem("Ja" if has_pdf else "-")
         pages_item.setTextAlignment(Qt.AlignCenter)
@@ -612,6 +674,7 @@ class VSCtoPDFMainWindow(QMainWindow):
         status_item.setTextAlignment(Qt.AlignCenter)
 
         pdf_item = QTableWidgetItem(pdf_path if has_pdf else "-")
+        pdf_item.setToolTip(f"Vollständiger PDF-Pfad:\n{pdf_path if has_pdf else 'Noch nicht generiert'}")
 
         self.table.setItem(row, 0, chk_item)
         self.table.setItem(row, 1, name_item)
@@ -740,6 +803,25 @@ class VSCtoPDFMainWindow(QMainWindow):
                 reveal_in_finder(target)
                 break
 
+    def copy_current_folder_path(self):
+        curr_row = self.table.currentRow()
+        if curr_row >= 0:
+            for it in self.file_items.values():
+                if it["row"] == curr_row:
+                    QApplication.clipboard().setText(it["folder"])
+                    self.lbl_status.setText(f"Ordner-Pfad kopiert: {it['folder']}")
+                    break
+
+    def copy_current_pdf_path(self):
+        curr_row = self.table.currentRow()
+        if curr_row >= 0:
+            for it in self.file_items.values():
+                if it["row"] == curr_row:
+                    p = it["pdf_path"] or it["path"]
+                    QApplication.clipboard().setText(p)
+                    self.lbl_status.setText(f"Pfad kopiert: {p}")
+                    break
+
     def show_context_menu(self, pos):
         item = self.table.itemAt(pos)
         if not item:
@@ -749,11 +831,21 @@ class VSCtoPDFMainWindow(QMainWindow):
         act_preview.triggered.connect(self.open_current_in_preview)
         act_finder = QAction(get_icon("finder.svg"), "Im Finder zeigen", self)
         act_finder.triggered.connect(self.reveal_current_in_finder)
+
+        act_copy_folder = QAction(get_icon("copy.svg"), "Ordner-Pfad kopieren", self)
+        act_copy_folder.triggered.connect(self.copy_current_folder_path)
+
+        act_copy_pdf = QAction(get_icon("copy.svg"), "PDF-Pfad kopieren", self)
+        act_copy_pdf.triggered.connect(self.copy_current_pdf_path)
+
         act_remove = QAction(get_icon("delete.svg"), "Aus Liste entfernen", self)
         act_remove.triggered.connect(self.remove_selected_from_list)
 
         menu.addAction(act_preview)
         menu.addAction(act_finder)
+        menu.addSeparator()
+        menu.addAction(act_copy_folder)
+        menu.addAction(act_copy_pdf)
         menu.addSeparator()
         menu.addAction(act_remove)
         menu.exec(self.table.viewport().mapToGlobal(pos))
@@ -802,6 +894,7 @@ class VSCtoPDFMainWindow(QMainWindow):
         pdf_item = self.table.item(r, 6)
         if pdf_item:
             pdf_item.setText(item["pdf_path"])
+            pdf_item.setToolTip(f"Vollständiger PDF-Pfad:\n{item['pdf_path']}")
         self.update_selection_label()
 
     def _on_conv_finished(self, success: int, total: int):

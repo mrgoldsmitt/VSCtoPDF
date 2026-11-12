@@ -8,7 +8,7 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
-VERSION="1.1.0"
+VERSION="1.1.1"
 APP_NAME="VSCtoPDF"
 
 echo "🔨 [1/4] Virtuelle Python-Umgebung prüfen..."

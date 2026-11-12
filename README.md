@@ -10,6 +10,10 @@
   Kann als echte macOS-App direkt nach `/Applications` (Programme) installiert werden. Startet aus Spotlight, Launchpad und dem Finder ohne Terminal.
 - **Reine SVG-Vektoricons:**
   Alle Icons der Benutzeroberfläche sind moderne, skalierbare SVG-Dateien (`assets/icons/`), die auch auf Retina-Displays gestochen scharf dargestellt werden.
+- **Interaktive Tabellen-Spalten & Vollständige Pfadanzeige:**
+  Spaltenbreiten lassen sich stufenlos mit der Maus anpassen. Dateipfade und PDF-Pfade werden mit Tooltip und Kontextmenü vollständig bereitgestellt.
+- **Integrierte Menüführung & Versionsverwaltung:**
+  Über das Menü (`v1.1.1 ▾`) in der Kopfzeile können Versionsdetails, Changelog, GitHub-Repository und Releases direkt aufgerufen werden.
 - **DIN-A4 Format mit Zeilennummern & Syntax-Highlighting:**
   Jede Datei wird exakt auf DIN-A4 Seitenbreite formatiert. Lange Codezeilen brechen automatisch und sauber um. Zeilennummern und Syntax-Hervorhebung sorgen für perfekte Lesbarkeit auf Papier.
 - **Kopfzeile (Header):**
@@ -104,6 +108,8 @@ VSCtoPDF/
 ├── gui.py               # Native macOS GUI mit SVG-Icons & Drag & Drop
 ├── converter.py         # PDF-Engine (ReportLab, Pygments, A4, Kopf- & Fußzeile)
 ├── printer.py           # macOS Druckanbindung (CUPS, lpstat, lp)
+├── version.py           # Versionsangaben & Changelog-Daten
+├── CHANGELOG.md         # Ausführliche Versionshistorie
 ├── start.command        # Doppelklick-Starter für Entwickler
 ├── install.sh           # Nativer macOS-Installer nach /Applications
 ├── build_app.sh         # Erstellt .app Bundle und .dmg Disk Image
@@ -111,7 +117,7 @@ VSCtoPDF/
 ├── LICENSE              # CC BY-NC 4.0 Lizenz
 ├── assets/              # Native Ressourcen
 │   ├── AppIcon.icns     # Multi-Resolution Retina App-Icon
-│   └── icons/           # Alle Icons im reinen SVG-Format
+│   └── icons/           # Alle Icons im reinen SVG-Format (100% vektorisiert)
 │       ├── app_icon.svg
 │       ├── add_files.svg
 │       ├── add_folder.svg
@@ -124,7 +130,14 @@ VSCtoPDF/
 │       ├── refresh.svg
 │       ├── select_all.svg
 │       ├── deselect_all.svg
-│       └── file_code.svg
+│       ├── file_code.svg
+│       ├── menu.svg
+│       ├── github.svg
+│       ├── changelog.svg
+│       ├── info.svg
+│       ├── lightbulb.svg
+│       ├── copy.svg
+│       └── download.svg
 └── examples/            # Beispielprojekt zum Testen
     └── demo_project/
         ├── index.html

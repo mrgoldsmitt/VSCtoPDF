@@ -7,6 +7,20 @@ und dieses Projekt folgt der [semantischen Versionierung](https://semver.org/lan
 
 ---
 
+## [1.1.1] - 2026-11-12
+
+### Verbessert & Hinzugefügt
+- **Manuelle Spaltenbreiten-Anpassung:** Alle Spalten der Dateitabelle können nun mit der Maus stufenlos in der Breite angepasst werden (`QHeaderView.Interactive`).
+- **Neues Dropdown-Menü:** Version, Changelog und GitHub-Links sind in einem kompakten Menü-Button (`Menü ▾`) direkt erreichbar.
+- **Vollständige Anzeige der Ordner-Pfade:**
+  - In der Tabelle durch frei erweiterbare Spaltenbreite, vollständige Tooltips beim Überfahren mit der Maus sowie neue Aktionen im Kontextmenü zum Kopieren von Ordner- und PDF-Pfaden.
+  - Im PDF-Header durch dynamische Schriftgrößenanpassung und automatischen Zweizeilen-Umbruch (kein Abschneiden mit `...` mehr).
+- **Vollständige SVG-Konvertierung:** Alle verbleibenden Emojis wurden durch native Vektor-SVGs (`menu.svg`, `github.svg`, `changelog.svg`, `copy.svg`, `lightbulb.svg`, `download.svg`) ersetzt.
+- **Optimierte Button-Beschriftung:** Druck-Button-Schriftgröße verkleinert (`font-size: 11px`), damit der Text auf allen Bildschirmgrößen sauber Platz findet.
+- **Weißer Auswahl-Hinweis:** Der Zähler 'x Dateien zum Drucken ausgewählt' ist nun in kontraststarkem Weiß (`#ffffff`) auf einem dezenten Status-Badge formatiert.
+
+---
+
 ## [1.1.0] - 2026-11-11
 
 ### Hinzugefügt

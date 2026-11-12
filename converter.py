@@ -76,15 +76,32 @@ class NumberedCanvas(canvas.Canvas):
         h = self.page_height
 
         # ---------------- Kopfzeile ----------------
-        self.setFont("Helvetica", 8)
+        avail_w = self.right_m - self.left_m
+        full_folder_str = f"Ordner: {self.folder_path}"
+
+        # Dynamische Schrift- und Zeilenanpassung: Der Ordnerpfad wird immer VOLLSTÄNDIG dargestellt
+        f_size = 8.0
+        text_w = self.stringWidth(full_folder_str, "Helvetica", f_size)
+        if text_w > avail_w:
+            f_size = max(6.5, 8.0 * (avail_w / text_w))
+            text_w = self.stringWidth(full_folder_str, "Helvetica", f_size)
+
+        self.setFont("Helvetica", f_size)
         self.setFillColorRGB(0.38, 0.42, 0.48)
-        
-        # Ordner-Pfad (wird bei Bedarf gekürzt, damit er nicht übersteht)
-        folder_display = self.folder_path
-        max_folder_len = 110
-        if len(folder_display) > max_folder_len:
-            folder_display = "..." + folder_display[-(max_folder_len - 3):]
-        self.drawString(self.left_m, h - 26, f"Ordner: {folder_display}")
+
+        if text_w <= avail_w:
+            self.drawString(self.left_m, h - 26, full_folder_str)
+        else:
+            # Bei extrem langen Pfaden sauber auf zwei Zeilen verteilen
+            split_idx = len(self.folder_path) // 2
+            slash_idx = self.folder_path.rfind("/", 0, split_idx + 15)
+            if slash_idx == -1:
+                slash_idx = split_idx
+            part1 = f"Ordner: {self.folder_path[:slash_idx+1]}"
+            part2 = f"        {self.folder_path[slash_idx+1:]}"
+            self.setFont("Helvetica", 6.5)
+            self.drawString(self.left_m, h - 22, part1)
+            self.drawString(self.left_m, h - 29, part2)
 
         # Dateiname
         self.setFont("Helvetica-Bold", 9)
